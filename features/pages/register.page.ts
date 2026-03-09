@@ -18,11 +18,15 @@ class RegisterPage {
     }
 
     public async clickElementByTestId(testId: string) {
-        await browser.page.getByTestId(testId).first().click();
+        const element = browser.page.getByTestId(testId).first();
+        await element.waitFor({ state: "visible", timeout: 15_000 });
+        await element.click();
     }
 
     public async fillElementByTestId(testId: string, value: string) {
-        await browser.page.getByTestId(testId).first().fill(value);
+        const element = browser.page.getByTestId(testId).first();
+        await element.waitFor({ state: "visible", timeout: 15_000 });
+        await element.fill(value);
     }
 }
 

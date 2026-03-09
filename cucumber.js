@@ -7,6 +7,6 @@ module.exports = {
         ],
         paths: ['features/**/*.feature'],
         timeout: 30000,
-        format: ['summary', 'json:reports/cucumber-report.json', 'html:reports/cucumber-report.html']
+        format: ['progress', 'summary', 'json:reports/cucumber-report.json', 'html:reports/cucumber-report.html']
     }
 };
