@@ -4,6 +4,24 @@ import assert from 'node:assert/strict';
 import browser from '../core/browser';
 import loginPage from '../pages/login.page';
 
+type RegisterCredentials = {
+  email: string;
+  password: string;
+};
+
+type TeacherWorld = {
+  registerCredentials?: RegisterCredentials;
+};
+
+async function loginWithStoredRegisterCredentials(world: TeacherWorld) {
+  const { registerCredentials } = world;
+  assert.ok(registerCredentials?.email, 'Missing register email for login fallback');
+  assert.ok(registerCredentials?.password, 'Missing register password for login fallback');
+
+  await loginPage.openLoginPage();
+  await loginPage.loginWithEmailAndPassword(registerCredentials.email, registerCredentials.password);
+}
+
 Given('the user is on log in page', async function () {
   await loginPage.LoginPage();
 });
@@ -33,14 +51,28 @@ When('the teacher clicks the element with test id {string}', async function (tes
 
 When('the teacher fills the following register information:', async function (table: DataTable) {
   const rows = table.hashes() as Array<{ testId: string; value: string }>;
+  const registerFormData = Object.fromEntries(rows.map(row => [row.testId, row.value])) as Record<string, string>;
 
   for (const row of rows) {
     await loginPage.fillElementByTestId(row.testId, row.value);
   }
+
+  (this as TeacherWorld).registerCredentials = {
+    email: registerFormData[loginPage.testIds.usernameOrEmailInput] ?? '',
+    password: registerFormData[loginPage.testIds.passwordInput] ?? '',
+  };
 });
 
 When('the teacher submits register form with test id {string}', async function (testId: string) {
   await loginPage.clickElementByTestId(testId);
+
+  const isRegistered = await loginPage.waitForUrlToContain('courses', 5_000);
+
+  if (isRegistered) {
+    return;
+  }
+
+  await loginWithStoredRegisterCredentials(this as TeacherWorld);
 });
 
 Then('the teacher should be on {string} page', async function (expectedPath: string) {

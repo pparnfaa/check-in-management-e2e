@@ -1,15 +1,19 @@
 import browser from "../core/browser";
 
 class LoginPage {
-    private readonly testIds = {
+    public readonly testIds = {
         form: "login-page",
         usernameOrEmailInput: "email-input",
         passwordInput: "password-input",
         loginButton: "signin-btn",
     };
 
-    public async LoginPage() {
+    public async openLoginPage() {
         await browser.goto("/");
+    }
+
+    public async LoginPage() {
+        await this.openLoginPage();
     }
 
     public async isElementByTestIdVisible(testId: string) {
@@ -45,6 +49,12 @@ class LoginPage {
 
     public async isLoginButtonVisible() {
         return this.isElementByTestIdVisible(this.testIds.loginButton);
+    }
+
+    public async loginWithEmailAndPassword(email: string, password: string) {
+        await this.fillElementByTestId(this.testIds.usernameOrEmailInput, email);
+        await this.fillElementByTestId(this.testIds.passwordInput, password);
+        await this.clickElementByTestId(this.testIds.loginButton);
     }
 
     public async getCurrentUrl(): Promise<string> {
