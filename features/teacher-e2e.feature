@@ -22,3 +22,5 @@ Feature: Teacher E2E Flow
       | course-year-input       | 2026        |
       | course-semester-select  | 1           |
     Then the element with test id "course-summary-card" should be visible
+    When the teacher creates session if not exists with title "First Session":
+    Then the element with test id "qr-code-section" in qr section should be visible

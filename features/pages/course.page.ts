@@ -66,6 +66,22 @@ class CoursePage {
             return false;
         }
     }
+
+    public async hasSessionWithTitle(sessionTitle: string): Promise<boolean> {
+        try {
+            const sessionElement = browser.page.getByTestId('session-title').filter({ hasText: sessionTitle }).first();
+            await sessionElement.waitFor({ state: "visible", timeout: 3_000 });
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    public async clickSessionWithTitle(sessionTitle: string) {
+        const sessionElement = browser.page.getByTestId('session-title').filter({ hasText: sessionTitle }).first();
+        await sessionElement.waitFor({ state: "visible", timeout: 15_000 });
+        await sessionElement.click();
+    }
 }
 
 export default new CoursePage();

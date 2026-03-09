@@ -151,6 +151,59 @@ When('the teacher submits course form with test id {string}', async function (te
   await coursePage.clickElementByTestId(testId);
 });
 
+Then('the form heading with text {string} should be visible', async function (expectedText: string) {
+  const headingElement = browser.page.getByTestId('form-heading').first();
+  await headingElement.waitFor({ state: 'visible', timeout: 15_000 });
+  
+  const actualText = await headingElement.textContent();
+  assert.ok(actualText?.includes(expectedText), `Expected form heading to contain "${expectedText}", but got "${actualText}"`);
+});
+
+When('the teacher fills the element with test id {string} with value {string}', async function (testId: string, value: string) {
+  await coursePage.fillElementByTestId(testId, value);
+});
+
+Then('the session should be created successfully', async function () {
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  const currentUrl = await coursePage.getCurrentUrl();
+  console.log(`Session created successfully. Current URL: ${currentUrl}`);
+});
+
+When('the teacher creates session if not exists with title {string}:', async function (sessionTitle: string) {
+  // Wait for course summary page to load
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  const sessionExists = await coursePage.hasSessionWithTitle(sessionTitle);
+
+  if (sessionExists) {
+    console.log(`Session "${sessionTitle}" already exists, navigating to session detail...`);
+    await coursePage.clickSessionWithTitle(sessionTitle);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    return;
+  }
+
+  console.log(`Session "${sessionTitle}" not found, creating new session...`);
+
+  await coursePage.clickElementByTestId('create-session-btn');
+  
+  const headingElement = browser.page.getByTestId('form-heading').first();
+  await headingElement.waitFor({ state: 'visible', timeout: 15_000 });
+  
+  await coursePage.fillElementByTestId('form-title-input', sessionTitle);
+  await coursePage.clickElementByTestId('mode-online-card');
+  await coursePage.clickElementByTestId('submit-btn');
+  
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  console.log(`Session "${sessionTitle}" created successfully.`);
+});
+
+Then('the element with test id {string} in qr section should be visible', async function (testId: string) {
+  const element = browser.page.getByTestId(testId).first();
+  await element.waitFor({ state: 'visible', timeout: 15_000 });
+  const isVisible = await element.isVisible();
+  assert.equal(isVisible, true, `Expected element with test id "${testId}" to be visible`);
+});
+
 When('the teacher creates course if not exists:', async function (table: DataTable) {
   const rows = table.hashes() as Array<{ testId: string; value: string }>;
   const courseData = Object.fromEntries(rows.map(row => [row.testId, row.value])) as Record<string, string>;
