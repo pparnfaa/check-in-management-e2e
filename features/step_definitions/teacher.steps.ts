@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import browser from '../core/browser';
 import loginPage from '../pages/login.page';
+import registerPage from '../pages/register.page';
 
 type RegisterCredentials = {
   email: string;
@@ -23,11 +24,11 @@ async function loginWithStoredRegisterCredentials(world: TeacherWorld) {
 }
 
 Given('the user is on log in page', async function () {
-  await loginPage.LoginPage();
+  await loginPage.openLoginPage();
 });
 
 Given('the teacher is on login page', async function () {
-  await loginPage.LoginPage();
+  await loginPage.openLoginPage();
 });
 
 Then('the login form should be visible', async function () {
@@ -41,12 +42,12 @@ Then('the login page should be visible', async function () {
 });
 
 Then('the element with test id {string} should be visible', async function (testId: string) {
-  const isVisible = await loginPage.isElementByTestIdVisible(testId);
+  const isVisible = await registerPage.isElementByTestIdVisible(testId);
   assert.equal(isVisible, true);
 });
 
 When('the teacher clicks the element with test id {string}', async function (testId: string) {
-  await loginPage.clickElementByTestId(testId);
+  await registerPage.clickElementByTestId(testId);
 });
 
 When('the teacher fills the following register information:', async function (table: DataTable) {
@@ -54,17 +55,17 @@ When('the teacher fills the following register information:', async function (ta
   const registerFormData = Object.fromEntries(rows.map(row => [row.testId, row.value])) as Record<string, string>;
 
   for (const row of rows) {
-    await loginPage.fillElementByTestId(row.testId, row.value);
+    await registerPage.fillElementByTestId(row.testId, row.value);
   }
 
   (this as TeacherWorld).registerCredentials = {
-    email: registerFormData[loginPage.testIds.usernameOrEmailInput] ?? '',
-    password: registerFormData[loginPage.testIds.passwordInput] ?? '',
+    email: registerFormData[registerPage.testIds.emailInput] ?? '',
+    password: registerFormData[registerPage.testIds.passwordInput] ?? '',
   };
 });
 
 When('the teacher submits register form with test id {string}', async function (testId: string) {
-  await loginPage.clickElementByTestId(testId);
+  await registerPage.clickElementByTestId(testId);
 
   const isRegistered = await loginPage.waitForUrlToContain('courses', 5_000);
 
